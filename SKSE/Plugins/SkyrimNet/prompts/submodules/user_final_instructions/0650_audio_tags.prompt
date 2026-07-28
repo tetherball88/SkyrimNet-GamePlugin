@@ -5,14 +5,50 @@
 {% set has_audio_tags = actor_tags_enabled or narrator_tags_enabled %}
 
 {% if has_audio_tags and (dialogue_mode or thought_mode) %}
-  {% set useChatterboxTags = get_actor_tts(npc.UUID) == "chatterbox" and actor_tags_enabled %}
+  {% set tts_engine = get_actor_tts(npc.UUID) %}
+  {% set useHiggsV3Tags = (tts_engine == "higgs" or tts_engine == "higgs_v3") and actor_tags_enabled %}
+  {% set useChatterboxTags = tts_engine == "chatterbox" and actor_tags_enabled %}
 
   {% set chatterboxEmotionTags = ["[angry]", "[fear]", "[surprised]", "[whispering]", "[advertisement]", "[dramatic]", "[narration]","[happy]", "[sarcastic]"] %}
   {% set chatterboxSoundTags = ["[clear throat]","[sigh]","[shush]","[cough]","[groan]","[sniff]","[gasp]","[chuckle]","[laugh]","[crying]"] %}
   ## Voice Performance Tags
+  {% if useHiggsV3Tags %}
+  Use control tags `<|category:tag|>` to steer emotion, prosody, style, and sound effects.
+  {% else %}
   Use [square bracket tags] to direct vocal performance. Tags control emotion, delivery, and reactions—the AI voice interprets them contextually.
+  {% endif %}
   
-  {% if useChatterboxTags %}
+  {% if useHiggsV3Tags %}
+    {% set exampleTag1 = "<|sfx:sigh|>Haah," %}
+    {% set exampleTag2 = "<|emotion:elation|>" %}
+    {% set exampleTag3 = "<|style:whispering|>" %}
+    {% set exampleTag4 = "<|prosody:expressive_high|>" %}
+    **Format rule & tag placements:**
+    Every tag is `<|category:tag|>`. Only use the recognized tags listed below; unrecognized tags degrade output.
+    - **Sentence-level** (emotion, style, prosody's `speed_* / pitch_* / expressive_*`): Put at the **start of the sentence** to color the whole sentence.
+    - **Inline** (sound effects `sfx`, prosody's `pause / long_pause`): Insert at the **exact position** in the sentence where the effect should occur.
+    - **`sfx` format:** `<|sfx:tag|>onomatopoeia, then the line` — the tag comes **first**, immediately followed by the onomatopoeia with **no space** between them (e.g. `<|sfx:cough|>Ahem, ...`, `<|sfx:laughter|>Haha, ...`).
+    - **Stacking:** You can stack tags in one sentence (e.g., a leading emotion tag + inline sfx).
+    - **Pacing:** `speed_very_slow` slows delivery to ~5s; for slower delivery, insert `<|prosody:long_pause|>` between phrases instead.
+
+    **Allowed Higgs Audio v3 tag catalog (43 tags total):**
+    - **Emotion (21) — sentence-level:** `affection`, `amusement`, `anger`, `arousal`, `awe`, `bitterness`, `confusion`, `contemplation`, `contentment`, `determination`, `disgust`, `elation`, `enthusiasm`, `fear`, `helplessness`, `longing`, `pride`, `relief`, `sadness`, `shame`, `surprise` (Syntax: `<|emotion:elation|>`)
+    - **Prosody (10):**
+      - Sentence-level: `speed_very_slow`, `speed_slow`, `speed_fast`, `speed_very_fast`, `pitch_low`, `pitch_high`, `expressive_high`, `expressive_low` (Syntax: `<|prosody:speed_slow|>`)
+      - Inline: `pause`, `long_pause` (Syntax: `<|prosody:pause|>`)
+    - **Style (3) — sentence-level:** `singing`, `shouting`, `whispering` (Syntax: `<|style:whispering|>`)
+    - **Sound effects (9) — inline:** `cough`, `laughter`, `crying`, `screaming`, `burping`, `humming`, `sigh`, `sniff`, `sneeze` (Syntax: `<|sfx:cough|>Ahem, ...`)
+
+    **Examples:**
+    - `<|emotion:elation|>Welcome aboard, we are absolutely thrilled to have you here!`
+    - `<|style:whispering|>Come closer, I have a little secret to share.`
+    - `<|prosody:speed_slow|>Take your time, there's really no need to rush.`
+    - `<|sfx:cough|>Ahem, welcome everyone, let's get started.`
+    - `<|sfx:laughter|>Haha, so glad you could make it!`
+    - `Hello there <|prosody:pause|> and welcome to the show.`
+    - `<|emotion:elation|><|sfx:laughter|>Haha, welcome, welcome, we're so happy you're here!`
+    - `<|sfx:sigh|>Haah, what a day — but welcome, please make yourself at home.`
+  {% elif useChatterboxTags %}
     {% set exampleTag1 = "[sigh]" %}
     {% set exampleTag2 = "[happy]" %}
     {% set exampleTag3 = "[whispering]" %}
@@ -52,7 +88,8 @@
     Tags only work in dialogue, not *narration*.
   {% endif %}
 
-  {% if not useChatterboxTags %}
+  {% if not useChatterboxTags and not useHiggsV3Tags %}
     Use sparingly—1-2 per response max.
   {% endif %}
 {% endif %}
+

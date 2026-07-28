@@ -36,6 +36,9 @@
     {% endif %}Pick the specific action that best matches.
     {% endif %}
 
+    ## Dialogue History
+    {{ get_recent_events(npc.UUID, 15) }}
+
     ## Most Recent Exchange
     {% set _player_said = "" %}
     {% set _player_recent = get_recent_events(5, player.UUID) %}
