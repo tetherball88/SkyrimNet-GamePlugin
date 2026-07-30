@@ -13,50 +13,38 @@
   {% set chatterboxSoundTags = ["[clear throat]","[sigh]","[shush]","[cough]","[groan]","[sniff]","[gasp]","[chuckle]","[laugh]","[crying]"] %}
   ## Voice Performance Tags
   {% if useHiggsV3Tags %}
-  Use control tags `<|category:tag|>` to steer emotion, prosody, style, and sound effects.
+    Use control tags `[category-tag]` to steer emotion, prosody, style, and sound effects.
   {% else %}
-  Use [square bracket tags] to direct vocal performance. Tags control emotion, delivery, and reactions—the AI voice interprets them contextually.
+    Use [square bracket tags] to direct vocal performance. Tags control emotion, delivery, and reactions—the AI voice interprets them contextually.
   {% endif %}
   
   {% if useHiggsV3Tags %}
-    {% set exampleTag1 = "<|sfx:sigh|>Haah," %}
-    {% set exampleTag2 = "<|emotion:elation|>" %}
-    {% set exampleTag3 = "<|style:whispering|>" %}
-    {% set exampleTag4 = "<|prosody:expressive_high|>" %}
+    {% set exampleTag1 = "[sfx-sigh]Haah," %}
+    {% set exampleTag2 = "[emotion-elation]" %}
+    {% set exampleTag3 = "[style-whispering]" %}
+    {% set exampleTag4 = "[prosody-expressive_high]" %}
 
-    **Format:** `<|category:tag|>`. Only use tags from the catalog below — anything else degrades audio or gets read aloud literally.
+    **Format:** `[category-tag]`, glued to text with no space. Only use tags from the catalog below — anything else degrades audio or gets read aloud literally. These are audio-only; never mix them with non-audio markup like `<internal_thought>`.
 
-    **Placement rules:**
-    - **Sentence-level** (emotion, style, `speed_*`, `pitch_*`, `expressive_*`): put at the **very start** of the sentence, glued directly to the first word — no space. Colors the whole sentence.
-      e.g. `<|emotion:elation|>Welcome aboard!`
-    - **Inline sfx**: insert at the exact spot the sound occurs. Glue the tag (no space) to a short onomatopoeia, then continue the line.
-      e.g. `<|sfx:cough|>Ahem, let's begin.`
-    - **Pauses:** Prefer plain `...` in the text for a natural short pause — it works more reliably than the pause tag. Use `<|prosody:long_pause|>` only for a longer, deliberate dramatic hold.
-      e.g. `Hello there... and welcome to the show.`
+    **Placement**
+    - **Sentence-level** (emotion, style, prosody `speed_*`/`pitch_*`/`expressive_*`): at the **very start** of the sentence — colors the whole sentence, so tag it once, not repeatedly.
+    - **Inline sfx**: at the exact spot the sound occurs, glued to a short onomatopoeia. e.g. `[sfx-cough]Ahem, let's begin.`
+    
+    **Stacking:** Combine at most **one tag per category** at a sentence start (e.g. emotion + style, or emotion + a prosody tag) — they control different things. Never stack two from the *same* category. Inline `sfx` can be added on top anywhere.
 
-    **Stacking:** You may combine **one tag per category** at the start of a sentence — e.g. emotion + style, or emotion + a sentence-level prosody tag — since they control different things (feeling vs. vocal technique vs. delivery mechanics). Inline `sfx` can be added anywhere on top of that.
-    Do **not** stack two tags from the *same* category (e.g. two emotions, or `pitch_low` + `pitch_high`) — pick the one that best fits the moment.
-    - ✅ `<|emotion:arousal|><|style:whispering|>Come closer... I need you.`
-    - ✅ `<|emotion:surprise|><|prosody:expressive_high|>I can't believe you! <|sfx:laughter|> HaHaHa!`
-    - ✅ `<|emotion:elation|><|sfx:laughter|>Haha, welcome, welcome!`
-    - ❌ `<|emotion:anger|><|emotion:disgust|>How dare you.` (two emotions)
+    **Bare onomatopoeia needs no tag.** "Ohh", "Mmh", "Ugh", "Aah" can sit directly in the line as light texture. Use the `sfx` tag only when you want a distinct, emphasized beat.
 
-    **You don't need a tag to use a vocal sound.** Plain onomatopoeia — "Haha", "Mmh", "Ugh", "Aah", "Sff" — can appear directly in the line with no `<|sfx:...|>` tag, as light natural texture. Use the actual `sfx` tag when you want it rendered as a distinct, emphasized performance beat instead.
+    **Tag catalog (41 total):**
+    - **Emotions:** `[emotion-affection]`, `[emotion-amusement]`, `[emotion-anger]`, `[emotion-arousal]`, `[emotion-awe]`, `[emotion-bitterness]`, `[emotion-confusion]`, `[emotion-contemplation]`, `[emotion-contentment]`, `[emotion-determination]`, `[emotion-disgust]`, `[emotion-elation]`, `[emotion-enthusiasm]`, `[emotion-fear]`, `[emotion-helplessness]`, `[emotion-longing]`, `[emotion-pride]`, `[emotion-relief]`, `[emotion-sadness]`, `[emotion-shame]`, `[emotion-surprise]`
+    - **Styles:** `[style-singing]`, `[style-shouting]`, `[style-whispering]`
+    - **Prosody:** `[prosody-speed_very_slow]`, `[prosody-speed_slow]`, `[prosody-speed_fast]`, `[prosody-speed_very_fast]`, `[prosody-pitch_low]`, `[prosody-pitch_high]`, `[prosody-expressive_high]`, `[prosody-expressive_low]`
+    - **SFX (inline, glued to onomatopoeia):** `[sfx-cough]`, `[sfx-laughter]`, `[sfx-crying]`, `[sfx-screaming]`, `[sfx-burping]`, `[sfx-humming]`, `[sfx-sigh]`, `[sfx-sniff]`, `[sfx-sneeze]`
 
-    **Tag catalog (43 total):**
-    - Emotion — `affection, amusement, anger, arousal, awe, bitterness, confusion, contemplation, contentment, determination, disgust, elation, enthusiasm, fear, helplessness, longing, pride, relief, sadness, shame, surprise`
-    - Style — `singing, shouting, whispering`
-    - Prosody (sentence-level) — `speed_very_slow, speed_slow, speed_fast, speed_very_fast, pitch_low, pitch_high, expressive_high, expressive_low`
-    - Prosody (inline) — `long_pause` (for `pause`, prefer `...` instead — see above)
-    - SFX (inline, glued to onomatopoeia) — `cough, laughter, crying, screaming, burping, humming, sigh, sniff, sneeze`
-
-    **Examples:**
-    - `<|emotion:elation|>Welcome aboard, we are absolutely thrilled to have you here!`
-    - `<|emotion:arousal|><|style:whispering|>Come closer, I have a little secret to share.`
-    - `<|sfx:laughter|>Haha, so glad you could make it!`
-    - `<|emotion:elation|><|sfx:laughter|>Haha, welcome, welcome, we're so happy you're here!`
-    - `Hello there... and welcome to the show.`
-    - `Mmh, that smells wonderful.` *(plain onomatopoeia, no tag needed)*
+    **Examples**
+    - `[emotion-arousal][prosody-pitch_low]Come closer... I have a secret.`
+    - `[emotion-elation][sfx-laughter]Haha, welcome, welcome!`
+    - `You want the truth? [emotion-bitterness]Fine. He was never coming back.`
+    - `[emotion-anger][emotion-disgust]...` ❌ two emotions — pick one.
   {% elif useChatterboxTags %}
     {% set exampleTag1 = "[sigh]" %}
     {% set exampleTag2 = "[happy]" %}
